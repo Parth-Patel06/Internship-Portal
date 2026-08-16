@@ -1,9 +1,9 @@
 const defaultInternships = [
-  {id:1,title:"Frontend Developer Intern",company:"Triobyte Technology",category:"Web Development",location:"Ahmedabad",mode:"Hybrid",duration:"3 Months",stipend:"₹8,000/month",skills:"HTML, CSS, JavaScript",description:"Build responsive interfaces and work with the development team."},
-  {id:2,title:"Data Analyst Intern",company:"Triobyte Technology",category:"Data Analytics",location:"Vadodara",mode:"On-site",duration:"6 Months",stipend:"₹10,000/month",skills:"Excel, SQL, Python",description:"Clean datasets, prepare reports and support business analysis."},
+ {id:1,title:"Frontend Developer Intern",company:"Triobyte Technology",category:"Web Development",location:"Anand",mode:"Hybrid",duration:"3 Months",stipend:"₹8,000/month",skills:"HTML, CSS, JavaScript",description:"Build responsive interfaces and work with the development team."},
+  {id:2,title:"Data Analyst Intern",company:"Triobyte Technology",category:"Data Analytics",location:"Remote",mode:"Remote",duration:"6 Months",stipend:"₹10,000/month",skills:"Excel, SQL, Python",description:"Clean datasets, prepare reports and support business analysis."},
   {id:3,title:"Python Developer Intern",company:"Triobyte Technology",category:"Software Development",location:"Remote",mode:"Remote",duration:"4 Months",stipend:"₹12,000/month",skills:"Python, APIs, Git",description:"Develop Python features and integrate APIs in real projects."},
-  {id:4,title:"UI/UX Design Intern",company:"Triobyte Technology",category:"Design",location:"Ahmedabad",mode:"Hybrid",duration:"3 Months",stipend:"₹7,000/month",skills:"Figma, UI Design",description:"Create user flows, wireframes and polished product interfaces."},
-  {id:5,title:"Cybersecurity Intern",company:"Triobyte Technology",category:"Cybersecurity",location:"Gandhinagar",mode:"On-site",duration:"6 Months",stipend:"₹9,000/month",skills:"Networking, Linux, Security",description:"Assist with security testing, documentation and monitoring."}
+  {id:4,title:"UI/UX Design Intern",company:"Triobyte Technology",category:"Design",location:"Vadodara",mode:"Hybrid",duration:"3 Months",stipend:"₹7,000/month",skills:"Figma, UI Design",description:"Create user flows, wireframes and polished product interfaces."},
+  {id:5,title:"Cybersecurity Intern",company:"Triobyte Technology",category:"Cybersecurity",location:"Gandhinagar",mode:"Remote",duration:"6 Months",stipend:"₹9,000/month",skills:"Networking, Linux, Security",description:"Assist with security testing, documentation and monitoring."}
 ];
 
 const state = {
