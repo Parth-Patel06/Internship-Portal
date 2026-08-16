@@ -295,3 +295,94 @@ body{min-height:100%;margin:0}body{font-family:Inter,Segoe UI,Arial,sans-serif;c
         height: 52px;
     }
 }
+
+/* =========================================
+   MOBILE HAMBURGER MENU
+   ========================================= */
+
+.mobile-menu-btn {
+    display: none;
+}
+
+
+/* ---------- MOBILE ONLY ---------- */
+
+@media (max-width: 760px) {
+
+    .topbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* Three-line menu button */
+    .mobile-menu-btn {
+        display: grid;
+        place-items: center;
+
+        width: 42px;
+        height: 42px;
+
+        border: 0;
+        border-radius: 9px;
+
+        background: transparent;
+        color: var(--navy);
+
+        font-size: 28px;
+        line-height: 1;
+
+        flex-shrink: 0;
+    }
+
+    .mobile-menu-btn:active {
+        background: #eef2f8;
+    }
+
+
+    /* Hide sidebar by default */
+    .sidebar {
+        position: fixed;
+
+        top: 72px;
+        left: 0;
+
+        width: 280px;
+        height: calc(100vh - 72px);
+
+        z-index: 2000;
+
+        transform: translateX(-105%);
+        transition: transform .25s ease;
+
+        overflow-y: auto;
+
+        box-shadow: 10px 0 30px rgba(0,0,0,.18);
+    }
+
+
+    /* Sidebar opened */
+    .sidebar.mobile-open {
+        transform: translateX(0);
+    }
+
+
+    /* Keep navigation vertical */
+    .sidebar nav {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 5px;
+        width: 100%;
+    }
+
+    .nav-btn {
+        width: 100%;
+        min-height: 48px;
+    }
+
+
+    /* Main content uses full screen */
+    .content {
+        width: 100%;
+    }
+}
