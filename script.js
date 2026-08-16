@@ -341,3 +341,41 @@ $("#profileForm").addEventListener("submit", e => {
 });
 
 if (state.currentUser) renderApp();
+
+/* =========================================
+   MOBILE MENU
+   ========================================= */
+
+const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+const sidebar = document.querySelector(".sidebar");
+
+if (mobileMenuBtn && sidebar) {
+
+    mobileMenuBtn.addEventListener("click", function () {
+        sidebar.classList.toggle("mobile-open");
+    });
+
+
+    /* Close menu when a navigation button is clicked */
+    document.querySelectorAll(".sidebar .nav-btn").forEach(function (button) {
+
+        button.addEventListener("click", function () {
+
+            if (window.innerWidth <= 760) {
+                sidebar.classList.remove("mobile-open");
+            }
+
+        });
+
+    });
+
+
+    /* Close menu when screen becomes desktop size */
+    window.addEventListener("resize", function () {
+
+        if (window.innerWidth > 760) {
+            sidebar.classList.remove("mobile-open");
+        }
+
+    });
+}
