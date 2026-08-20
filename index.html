@@ -1,121 +1,89 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Triobyte Internship Portal</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#071b33">
+  <meta name="description" content="Triobyte Technology Internal Company Portal">
+  <title>Triobyte Technology — Internal Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="toast" class="toast"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <section id="authView" class="auth-page">
-    <div class="auth-shell">
-      <div class="auth-intro">
-        <img src="TRIOBYTE.jpeg" alt="Triobyte Technologies" class="auth-logo" />
-        <p class="auth-kicker">TRIOBYTE TECHNOLOGIES</p>
-        <h1>Triobyte's Official<br><span>Internship Portal</span></h1>
-        <p class="auth-copy">Explore. Apply. Grow with Triobyte.</p>
-        <div class="auth-benefits">
-          <div><b>✦</b><span><strong>Discover Opportunities</strong><small>Find internship roles that match your skills.</small></span></div>
-          <div><b>◇</b><span><strong>Learn & Grow</strong><small>Work on real-world projects and gain practical experience.</small></span></div>
-          <div><b>◈</b><span><strong>Build Your Future</strong><small>Kickstart your career with meaningful experience.</small></span></div>
-        </div>
-        <div class="auth-wave"></div>
-        <small class="copyright">© 2026 Triobyte Technologies. All rights reserved.</small>
+    <div class="auth-panel">
+      <div class="auth-brand">
+        <img src="Triobyte logo.jpg" alt="Triobyte Technology logo">
+        <span>TRIOBYTE TECHNOLOGY</span>
       </div>
-
-      <div class="auth-card">
-        <div class="auth-card-heading">
-          <h2>Welcome Back!</h2>
-          <p>Login to continue your journey</p>
-        </div>
-       
-
-        <form id="loginForm" class="auth-form">
-          <label>Email address</label>
-          <input id="loginEmail" type="email" required placeholder="student@example.com" />
-          <label>Password</label>
-          <input id="loginPassword" type="password" required placeholder="••••••••" />
-          <label>Role</label>
-          <select id="loginRole">
-            <option value="student">Student</option>
-            <option value="admin">Admin</option>
-          </select>
-          <div class="login-options"><label><input type="checkbox" /> <span>Remember me</span></label><button type="button" class="forgot-btn">Forgot Password?</button></div>
-          <button class="primary-btn login-btn" type="submit">Login</button>
-          <p class="register-hint">Don't have an account? <button type="button" class="inline-auth" data-auth="register">Register here</button></p>
-          <p class="demo-note">Demo admin: admin123@portal.com / Admin@0987</p>
-        </form>
-
-        <form id="registerForm" class="auth-form hidden">
-          <label>Full Name</label><input id="regName" required placeholder="Your full name" />
-          <label>Email</label><input id="regEmail" type="email" required placeholder="student@example.com" />
-          <label>Password</label><input id="regPassword" type="password" minlength="6" required placeholder="Minimum 6 characters" />
-          <label>Course</label><input id="regCourse" required placeholder="B.Sc. IT" />
-          <label>College</label><input id="regCollege" required placeholder="Your college" />
-          <button class="primary-btn login-btn" type="submit">Create Student Account</button>
-        </form>
+      <p class="eyebrow">INTERNAL COMPANY PORTAL</p>
+      <h1>One secure workspace for the whole company.</h1>
+      <p class="auth-copy">Projects, people, attendance, work logs, repositories and company communication in one place.</p>
+      <div class="auth-points">
+        <div><b>01</b><span><strong>Role-based access</strong><small>CEO, HR, Admin and Employee experiences are separated by permission.</small></span></div>
+        <div><b>02</b><span><strong>Company accounts only</strong><small>No public registration. Accounts are created by authorized company roles.</small></span></div>
+        <div><b>03</b><span><strong>Responsive by design</strong><small>Built for mobile, tablet, Windows, macOS and large displays.</small></span></div>
       </div>
+      <small class="auth-foot">© 2026 Triobyte Technology. Internal use only.</small>
+    </div>
+
+    <div class="login-card">
+      <div class="login-heading">
+        <span class="secure-badge">SECURE LOGIN</span>
+        <h2>Welcome back</h2>
+        <p>Sign in with your Triobyte company account.</p>
+      </div>
+      <form id="loginForm" class="form-stack">
+        <label>Company email<input id="loginEmail" type="email" autocomplete="username" placeholder="emp001@triobyte.com" required></label>
+        <label>Password<input id="loginPassword" type="password" autocomplete="current-password" placeholder="Enter your password" required></label>
+        <div class="form-row between"><label class="check"><input id="rememberMe" type="checkbox"> Remember me</label><button type="button" class="text-btn" id="forgotBtn">Forgot password?</button></div>
+        <button class="primary-btn full-btn" type="submit">Sign in</button>
+      </form>
+      <div class="login-note"><strong>Development preview</strong><span>Authentication will move to the secure backend. Demo accounts are provided only for frontend testing.</span></div>
     </div>
   </section>
 
   <section id="appView" class="app hidden">
-    <header class="topbar">
-         <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
-    ☰
-</button>
-      <div class="brand compact">
-        <div><strong>Triobyte Internship Portal</strong><small id="roleLabel">Student</small></div>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-head">
+        <img src="Triobyte logo.jpg" alt="Triobyte Technology">
+        <div><strong>TRIOBYTE</strong><small>Technology</small></div>
+        <button id="closeSidebar" class="icon-btn mobile-only" aria-label="Close navigation">×</button>
       </div>
-      <div class="top-actions"><button class="icon-btn" aria-label="Notifications">♧<span></span></button><div class="user-pill"><div class="avatar">P</div><div><b id="userName">Parth</b><small id="topRole">Student</small></div></div><button id="logoutBtn" class="outline-btn">Logout</button></div>
-    </header>
+      <div class="sidebar-role" id="sidebarRole">EMPLOYEE</div>
+      <nav id="navMenu" class="nav-menu"></nav>
+      <div class="sidebar-bottom">
+        <button class="nav-item" data-page="settings"><span>⚙</span>Settings</button>
+        <button class="nav-item danger" id="sidebarLogout"><span>↪</span>Sign out</button>
+      </div>
+    </aside>
 
-    <div class="layout">
-      <aside class="sidebar">
-        <div class="sidebar-brand"><img src="TRIOBYTE.jpeg" alt="Triobyte Technologies" /></div>
-        <nav>
-          <button class="nav-btn active" data-page="dashboard"><span>⌂</span>Dashboard</button>
-          <button class="nav-btn" data-page="internships"><span>▣</span>Internships</button>
-          <button class="nav-btn student-only" data-page="applications"><span>▤</span>My Applications</button>
-          <button class="nav-btn student-only" data-page="profile"><span>♙</span>My Profile</button>
-          <button class="nav-btn admin-only" data-page="manageInternships"><span>▦</span>Manage Internships</button>
-          <button class="nav-btn admin-only" data-page="manageApplications"><span>▤</span>Applications</button>
-          <button class="nav-btn admin-only" data-page="students"><span>♙</span>Students</button>
-          <button class="nav-btn support-btn"><span>?</span>Help & Support</button>
-        </nav>
-        <button id="sidebarLogout" class="sidebar-logout"><span>↪</span>Logout</button>
-      </aside>
+    <main class="main">
+      <header class="topbar">
+        <button id="openSidebar" class="icon-btn mobile-only" aria-label="Open navigation">☰</button>
+        <div class="top-search"><span>⌕</span><input id="globalSearch" placeholder="Search portal..." aria-label="Search portal"></div>
+        <div class="top-actions">
+          <button class="icon-btn" id="notificationBtn" aria-label="Notifications">♧<i></i></button>
+          <button class="icon-btn" id="messageBtn" aria-label="Messages">☵</button>
+          <div class="user-menu"><div class="avatar" id="userAvatar">P</div><div class="user-meta"><strong id="userName">Parth Patel</strong><small id="userRole">Employee</small></div></div>
+          <button class="icon-btn" id="logoutBtn" aria-label="Sign out">↪</button>
+        </div>
+      </header>
 
-      <main class="content">
-        <section id="dashboardPage" class="page">
-          <div class="hero">
-            <div class="hero-copy"><p>FIND YOUR FUTURE</p><h2>Find Your Dream Internship</h2><span>Kickstart your career with exciting opportunities at Triobyte.</span><div class="hero-search"><input id="heroSearch" placeholder="Search internships, skills or roles..." /><button id="heroSearchBtn">Search</button></div></div>
-            <div class="hero-art"><div class="art-circle"></div><div class="art-person"><div class="head"></div><div class="body"></div><div class="laptop"></div></div><i>&lt;/&gt;</i><em>✦</em></div>
-          </div>
-          <div class="page-heading dashboard-heading"><div><p class="eyebrow">OVERVIEW</p><h2 id="welcomeTitle">Welcome</h2><p>Manage your internship journey from one place.</p></div></div>
-          <div id="statsGrid" class="stats-grid"></div>
-          <div class="section-card"><div class="section-title"><h3>Recommended Internships</h3><button class="link-btn" data-go="internships">View All →</button></div><div id="dashboardInternships" class="cards-grid"></div></div>
-        </section>
-
-        <section id="internshipsPage" class="page hidden">
-          <div class="page-heading"><div><p class="eyebrow">OPPORTUNITIES</p><h2>Browse Internships</h2><p>Find an opportunity that matches your skills and goals.</p></div></div>
-          <div class="filters"><input id="searchInput" placeholder="Search internships..." /><select id="categoryFilter"><option value="">All categories</option></select><select id="locationFilter"><option value="">All locations</option></select></div>
-          <div id="internshipGrid" class="cards-grid browse-grid"></div>
-        </section>
-
-        <section id="applicationsPage" class="page hidden"><div class="page-heading"><div><p class="eyebrow">TRACKING</p><h2>My Applications</h2><p>Track every application and its current status.</p></div></div><div id="myApplications" class="table-card"></div></section>
-
-        <section id="profilePage" class="page hidden"><div class="page-heading"><div><p class="eyebrow">ACCOUNT</p><h2>My Profile</h2><p>Keep your student information updated.</p></div></div><div class="form-card"><form id="profileForm" class="form-grid"><label>Full Name<input id="profileName" required /></label><label>Email<input id="profileEmail" type="email" required /></label><label>Course<input id="profileCourse" required /></label><label>College<input id="profileCollege" required /></label><label>Phone<input id="profilePhone" placeholder="+91..." /></label><label>Skills<input id="profileSkills" placeholder="HTML, CSS, JavaScript" /></label><label class="full">Resume<input id="profileResume" type="file" accept=".pdf,.doc,.docx" /></label><button class="primary-btn" type="submit">Save Profile</button></form></div></section>
-
-        <section id="manageInternshipsPage" class="page hidden"><div class="page-heading"><div><p class="eyebrow">ADMIN</p><h2>Manage Internships</h2><p>Create, edit and delete internship listings.</p></div><button id="addInternshipBtn" class="primary-btn">+ Add Internship</button></div><div id="adminInternships" class="table-card"></div></section>
-        <section id="manageApplicationsPage" class="page hidden"><div class="page-heading"><div><p class="eyebrow">ADMIN</p><h2>Applications</h2><p>Review student applications and update their status.</p></div></div><div id="adminApplications" class="table-card"></div></section>
-        <section id="studentsPage" class="page hidden"><div class="page-heading"><div><p class="eyebrow">ADMIN</p><h2>Students</h2><p>View registered students.</p></div></div><div id="studentsTable" class="table-card"></div></section>
-      </main>
-    </div>
+      <div id="pageContent" class="page-content"></div>
+      <footer class="footer"><span>© 2026 Triobyte Technology. Internal use only.</span><span>Portal UI v1.0</span></footer>
+    </main>
   </section>
 
-  <div id="modal" class="modal hidden"><div class="modal-box"><button id="closeModal" class="modal-close">×</button><div id="modalContent"></div></div></div>
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card"><button id="closeModal" class="modal-close" aria-label="Close">×</button><div id="modalContent"></div></div>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>
