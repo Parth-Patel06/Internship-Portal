@@ -1,381 +1,97 @@
-const defaultInternships = [
- {id:1,title:"Frontend Developer Intern",company:"Triobyte Technology",category:"Web Development",location:"Anand",mode:"Hybrid",duration:"3 Months",stipend:"₹8,000/month",skills:"HTML, CSS, JavaScript",description:"Build responsive interfaces and work with the development team."},
-  {id:2,title:"Data Analyst Intern",company:"Triobyte Technology",category:"Data Analytics",location:"Remote",mode:"Remote",duration:"6 Months",stipend:"₹10,000/month",skills:"Excel, SQL, Python",description:"Clean datasets, prepare reports and support business analysis."},
-  {id:3,title:"Python Developer Intern",company:"Triobyte Technology",category:"Software Development",location:"Remote",mode:"Remote",duration:"4 Months",stipend:"₹12,000/month",skills:"Python, APIs, Git",description:"Develop Python features and integrate APIs in real projects."},
-  {id:4,title:"UI/UX Design Intern",company:"Triobyte Technology",category:"Design",location:"Vadodara",mode:"Hybrid",duration:"3 Months",stipend:"₹7,000/month",skills:"Figma, UI Design",description:"Create user flows, wireframes and polished product interfaces."},
-  {id:5,title:"Cybersecurity Intern",company:"Triobyte Technology",category:"Cybersecurity",location:"Gandhinagar",mode:"Remote",duration:"6 Months",stipend:"₹9,000/month",skills:"Networking, Linux, Security",description:"Assist with security testing, documentation and monitoring."}
-];
-
-const state = {
-  users: JSON.parse(localStorage.getItem("sip_users") || "[]"),
-  internships: JSON.parse(localStorage.getItem("sip_internships") || "null") || defaultInternships,
-  applications: JSON.parse(localStorage.getItem("sip_applications") || "[]"),
-  currentUser: JSON.parse(localStorage.getItem("sip_currentUser") || "null")
+const demoUsers={
+  'ceo@triobyte.com':{password:'Demo@123',role:'CEO',name:'Founder / CEO',initials:'C',level:'Founder'},
+  'hr@triobyte.com':{password:'Demo@123',role:'HR',name:'HR Manager',initials:'H',level:'Management'},
+  'admin@triobyte.com':{password:'Demo@123',role:'Admin',name:'System Administrator',initials:'A',level:'Administrator'},
+  'emp001@triobyte.com':{password:'Demo@123',role:'Employee',name:'Parth Patel',initials:'P',level:'L3'}
 };
 
-function save() {
-  localStorage.setItem("sip_users", JSON.stringify(state.users));
-  localStorage.setItem("sip_internships", JSON.stringify(state.internships));
-  localStorage.setItem("sip_applications", JSON.stringify(state.applications));
-  localStorage.setItem("sip_currentUser", JSON.stringify(state.currentUser));
+const menus={
+  CEO:[['dashboard','Dashboard','⌂'],['overview','Company Overview','▦'],['analytics','Analytics','◌'],['projects','Projects','▣'],['teams','Teams','♙'],['employees','Employees','♧'],['attendance','Attendance','◷'],['finance','Finance','₹'],['repositories','Repositories','⌘'],['tasks','Tasks','✓'],['reports','Reports','▤'],['messages','Messages','☵']],
+  HR:[['dashboard','Dashboard','⌂'],['employees','Employees','♙'],['interns','Interns','◇'],['attendance','Attendance','◷'],['leave','Leave Management','✓'],['tasks','Tasks & Deadlines','▣'],['performance','Performance','↗'],['salary','Salary','₹'],['overtime','Overtime','◴'],['roles','Role Management','♧'],['worklog','Work Logs','▤'],['reports','Reports','▥'],['messages','Messages','☵']],
+  Admin:[['dashboard','Dashboard','⌂'],['users','Users','♙'],['roles','Roles & Permissions','♧'],['tasks','Tasks & Deadlines','✓'],['projects','Projects','▣'],['repositories','Repositories','⌘'],['monitoring','System Monitoring','◉'],['announcements','Announcements','◇'],['backup','Backup & Restore','↻'],['audit','Audit Logs','▤'],['reports','Reports','▥']],
+  Employee:[['dashboard','Dashboard','⌂'],['tasks','My Tasks','✓'],['projects','My Projects','▣'],['repositories','Code Repositories','⌘'],['worklog','Work Log','▤'],['attendance','Attendance','◷'],['leave','Leave','✓'],['chat','Chats','☵'],['groups','Groups','♧'],['documents','Documents','▤'],['certificates','Certificates','▧'],['profile','Profile','♙']]
+};
+
+let currentUser=null;
+let currentPage='dashboard';
+const $=s=>document.querySelector(s);
+const pageContent=$('#pageContent');
+
+function toast(message){const el=$('#toast');el.textContent=message;el.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>el.classList.remove('show'),2600)}
+function esc(value){return String(value).replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\\':'&#92;','"':'&quot;'}[m]))}
+function setTheme(theme){document.body.classList.remove('dark','accent');if(theme==='dark')document.body.classList.add('dark');if(theme==='accent')document.body.classList.add('accent');localStorage.setItem('triobyteTheme',theme);document.querySelectorAll('.theme-btn').forEach(b=>b.classList.toggle('active',b.dataset.theme===theme))}
+function loadTheme(){setTheme(localStorage.getItem('triobyteTheme')||'light')}
+
+function buildNav(){const nav=$('#navMenu');nav.innerHTML=menus[currentUser.role].map(([page,label,icon])=>`<button class="nav-item ${page===currentPage?'active':''}" data-page="${page}"><span>${icon}</span>${label}</button>`).join('')}
+function updateUser(){
+  $('#sidebarRole').textContent=currentUser.role.toUpperCase();
+  $('#userName').textContent=currentUser.name;
+  $('#userRole').textContent=`${currentUser.role} • ${currentUser.level}`;
+  $('#userAvatar').textContent=currentUser.initials;
+}
+function openApp(){
+  $('#authView').classList.add('hidden');$('#appView').classList.remove('hidden');
+  buildNav();updateUser();loadTheme();renderPage(currentPage);
+}
+function logout(){currentUser=null;localStorage.removeItem('triobyteUser');$('#appView').classList.add('hidden');$('#authView').classList.remove('hidden');$('#loginForm').reset();toast('Signed out safely.')}
+function login(email,password){
+  const user=demoUsers[email.toLowerCase()];
+  if(!user||user.password!==password){toast('Invalid company email or password.');return}
+  currentUser={...user,email:email.toLowerCase()};localStorage.setItem('triobyteUser',JSON.stringify(currentUser));openApp();toast(`Welcome back, ${user.name}.`)
 }
 
-function uid(prefix="id") { return prefix + Date.now() + Math.random().toString(16).slice(2); }
+function stat(icon,label,value,foot,kind='blue'){return `<article class="stat-card"><div class="stat-top"><span class="stat-label">${label}</span><span class="stat-icon ${kind}">${icon}</span></div><div class="stat-value">${value}</div><div class="stat-foot">${foot}</div></article>`}
+function panel(title,body,extra=''){return `<section class="panel ${extra}"><div class="panel-title"><h3>${title}</h3>${body.includes('View All')?'': '<small>Updated today</small>'}</div>${body}</section>`}
+function listRows(items){return `<div class="list">${items.map(x=>`<div class="list-row"><div><strong>${x[0]}</strong><small>${x[1]}</small></div><span class="badge ${x[3]||''}">${x[2]}</span></div>`).join('')}</div>`}
+function chart(){return `<div class="chart">${[55,68,62,78,70,88,80,96].map(h=>`<i style="--h:${h}%"></i>`).join('')}</div><div class="chart-labels"><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span></div>`}
+function ring(total='128'){return `<div class="ring-wrap"><div class="ring"><div class="ring-center">${total}</div></div><div class="legend"><span><i class="dot" style="background:var(--blue)"></i>Development 68</span><span><i class="dot" style="background:var(--green)"></i>Design 24</span><span><i class="dot" style="background:var(--orange)"></i>Sales 16</span><span><i class="dot" style="background:#cbd3de"></i>Other 20</span></div></div>`}
+function progressRows(items){return `<div class="list">${items.map(x=>`<div class="list-row"><div style="flex:1"><strong>${x[0]}</strong><small>${x[1]}</small><div class="progress"><i style="--w:${x[2]}%"></i></div></div><span class="badge ${x[3]||'blue'}">${x[2]}%</span></div>`).join('')}</div>`}
 
-const $ = s => document.querySelector(s);
-const $$ = s => [...document.querySelectorAll(s)];
+function dashboardCEO(){return `<div class="page-head"><div><div class="welcome">Good morning, ${esc(currentUser.name)} 👋</div><h1>Executive overview</h1><p>Company-wide performance, people, projects and operations.</p></div><span class="badge blue">Monday, 20 Aug 2026</span></div><div class="stats-grid">${stat('♙','Total Employees','128','+12% vs last month','blue')}${stat('▣','Active Projects','32','+8% vs last month','green')}${stat('₹','Revenue This Month','₹48.75L','+15.3% vs last month','orange')}${stat('▤','Open Risks','4','2 require attention','red')}</div><div class="dashboard-grid">${panel('Company performance',chart(),'span-2')}${panel('Project status',ring('32'))}${panel('Top departments',progressRows([['Development','Delivery health',92],['Design','Delivery health',85],['Sales','Target progress',78],['HR','Operations',90]]))}${panel('Recent alerts',listRows([['Project AI Chatbot delayed','High priority','Action','red'],['5 employees on leave','People operations','Review','orange'],['Open merge requests','Engineering','27','blue']]))}${panel('Management activity',listRows([['New project created','Mobile Banking App','2h ago','green'],['Salary processed','Finance cycle','Today','blue'],['Employee promoted','Level change','Yesterday','purple']]))}</div>`}
 
-function toast(message) {
-  const el = $("#toast");
-  el.textContent = message;
-  el.classList.add("show");
-  setTimeout(() => el.classList.remove("show"), 2400);
+function dashboardHR(){return `<div class="page-head"><div><div class="welcome">Good morning, ${esc(currentUser.name)} 👋</div><h1>People operations</h1><p>Manage employees, attendance, leave and workforce activity.</p></div><span class="badge blue">HR workspace</span></div><div class="stats-grid">${stat('♙','Total Employees','128','+5 this month','purple')}${stat('●','Present Today','98','76% of total','green')}${stat('◷','On Leave Today','18','14% of total','orange')}${stat('◇','New Joiners','7','This month','blue')}</div><div class="dashboard-grid">${panel('Attendance overview',chart(),'span-2')}${panel('Employee distribution',ring())}${panel('Leave requests',listRows([['Aman Tiwari','15 Jun – 17 Jun','Pending','orange'],['Neha Iyer','24 Jun – 25 Jun','Pending','orange'],['Vikram Patel','20 Jun','Approved','green'],['Kavya Nair','18 Jun – 20 Jun','Rejected','red']]))}${panel('Upcoming birthdays',listRows([['Rohan Verma','Frontend Developer','24 Jun','blue'],['Neha Iyer','UI/UX Designer','26 Jun','blue'],['Kavya Nair','HR Executive','28 Jun','blue']]))}${panel('HR tasks',listRows([['Review leave requests','6 pending','Open','orange'],['Interview scheduled','3 today','Today','blue'],['Documents to verify','4 pending','Open','orange'],['Onboarding tasks','2 pending','Open','green']]))}</div>`}
+
+function dashboardAdmin(){return `<div class="page-head"><div><div class="welcome">System overview, ${esc(currentUser.name)}</div><h1>Administration</h1><p>Users, permissions, security, system activity and operational controls.</p></div><span class="badge green">Systems healthy</span></div><div class="stats-grid">${stat('♙','Total Users','132','+10% vs last month','blue')}${stat('●','Active Sessions','118','89% of total','green')}${stat('◉','System Uptime','99.9%','This month','green')}${stat('!','Pending Requests','8','Require action','red')}</div><div class="dashboard-grid">${panel('User role distribution',ring('132'))}${panel('System activity',chart())}${panel('Security overview',listRows([['Failed logins','Last 7 days','12','red'],['Password changes','Last 7 days','24','blue'],['Blocked users','Current','3','orange'],['Open audit alerts','Requires review','2','red']]))}${panel('Recent system logs',`<div class="table-wrap"><table class="table"><thead><tr><th>Event</th><th>User</th><th>Time</th></tr></thead><tbody><tr><td>User login</td><td>emp001@triobyte.com</td><td>10:20 AM</td></tr><tr><td>Role updated</td><td>hr@triobyte.com</td><td>09:15 AM</td></tr><tr><td>New user created</td><td>admin@triobyte.com</td><td>08:44 AM</td></tr><tr><td>Password reset</td><td>emp014@triobyte.com</td><td>08:20 AM</td></tr></tbody></table></div>`,'span-2')}</div>`}
+
+function dashboardEmployee(){return `<div class="page-head"><div><div class="welcome">Good morning, ${esc(currentUser.name)} 👋</div><h1>Your work summary</h1><p>Everything you need for today's work, projects and company activity.</p></div><span class="badge blue">Employee • ${esc(currentUser.level)}</span></div><div class="stats-grid">${stat('✓','My Tasks','12','5 due today','blue')}${stat('▣','My Projects','3','2 in progress','green')}${stat('◷','Active Project Deadline','28 Jun','5 days left','orange')}${stat('▤',"Today's Work Log",'6h 30m','Logged today','purple')}</div><div class="dashboard-grid">${panel('Active project',`<div><strong>AI Chatbot System</strong><p style="color:var(--muted);font-size:11px;line-height:1.5">Internal customer-support automation project assigned to you.</p><div class="progress"><i style="--w:75%"></i></div><div style="display:flex;justify-content:space-between;margin-top:8px;font-size:10px;color:var(--muted)"><span>75% complete</span><span>Due 28 Jun 2026</span></div></div>`,'span-2')}${panel("Today's work log",listRows([['Implemented login API','2h 00m','Done','green'],['Integrated chatbot module','2h 15m','Done','green'],['Fixed UI bug','1h 00m','Done','green'],['Code review','1h 15m','Done','green']]))}${panel('Attendance calendar',`<div class="table-wrap"><table class="table"><thead><tr><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th></tr></thead><tbody><tr><td>18 ✓</td><td>19 ✓</td><td>20 ✓</td><td>21 ✓</td><td>22 ✓</td></tr><tr><td>25 ✓</td><td>26 ✓</td><td>27 •</td><td>28</td><td>29</td></tr></tbody></table></div>`)}${panel('My projects',progressRows([['AI Chatbot System','In Progress',75],['Mobile Banking App','In Progress',60],['Website Redesign','On Hold',30,'orange']]))}${panel('Upcoming tasks',listRows([['Fix login API issue','AI Chatbot System','Due today','red'],['Create dashboard UI','Admin Portal','Tomorrow','orange'],['Review code PR #245','Mobile Banking App','In 2 days','blue'],['Update documentation','Internal Project','In 3 days','green']]))}</div>`}
+
+function genericPage(title,subtitle,body){return `<div class="page-head"><div><div class="welcome">${esc(currentUser.role)} workspace</div><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div><button class="primary-btn" data-action="demo">+ New</button></div>${body}`}
+function pageFor(role,page){
+  if(page==='dashboard')return role==='CEO'?dashboardCEO():role==='HR'?dashboardHR():role==='Admin'?dashboardAdmin():dashboardEmployee();
+  if(page==='profile')return genericPage('My profile','Your company identity and employment information.',`<div class="profile"><section class="panel profile-card"><div class="profile-avatar">${currentUser.initials}</div><h3>${esc(currentUser.name)}</h3><p>${esc(currentUser.role)} • ${esc(currentUser.level)}</p><span class="badge green">Active employee</span></section><section class="panel"><div class="form-grid"><label>Full Name<input value="${esc(currentUser.name)}"></label><label>Company Email<input value="${esc(currentUser.email)}" readonly></label><label>Employee ID<input value="EMP001"></label><label>Company ID<input value="TRI-EMP-001"></label><label>Mobile Number<input placeholder="+91 ..."></label><label>Joining Date<input value="20 Apr 2026"></label><label>Employment status<input value="Permanent"></label><label>Employee level<input value="${esc(currentUser.level)}"></label><label class="full">Address<textarea rows="3" placeholder="Company record address"></textarea></label><button class="primary-btn">Save changes</button></div></section></div>`);
+  if(page==='settings')return genericPage('Settings','Control your appearance, password and account preferences.',`<div class="settings-grid"><button class="theme-btn ${!document.body.classList.contains('dark')&&!document.body.classList.contains('accent')?'active':''}" data-theme="light"><div class="theme-preview"></div><strong>Light</strong><small>Clean company workspace</small></button><button class="theme-btn ${document.body.classList.contains('dark')?'active':''}" data-theme="dark"><div class="theme-preview dark"></div><strong>Dark</strong><small>Low-light workspace</small></button><button class="theme-btn ${document.body.classList.contains('accent')?'active':''}" data-theme="accent"><div class="theme-preview accent"></div><strong>Custom Accent</strong><small>Triobyte accent experience</small></button></div><div class="panel" style="margin-top:14px"><div class="panel-title"><h3>Security</h3></div><button class="primary-btn" data-action="password">Change password</button></div>`);
+  if(page==='tasks'||page==='projects'||page==='repositories'||page==='employees'||page==='users'||page==='interns'||page==='attendance'||page==='leave'||page==='salary'||page==='overtime'||page==='roles'||page==='worklog'||page==='reports'||page==='messages'||page==='chat'||page==='groups'||page==='documents'||page==='certificates'||page==='analytics'||page==='overview'||page==='teams'||page==='finance'||page==='monitoring'||page==='announcements'||page==='backup'||page==='audit'||page==='performance')return modulePage(page);
+  return genericPage('Coming module','This screen is part of the portal foundation and will be connected to the backend in the next implementation stage.',`<section class="panel"><h3>Ready for backend integration</h3><p style="color:var(--muted);line-height:1.6">The navigation, responsive shell, role separation and design tokens are in place. Data, permissions and server actions must be implemented before this is production-ready.</p></section>`);
 }
-
-function showAuth(type="login") {
-  $$(".tab").forEach(b => b.classList.toggle("active", b.dataset.auth === type));
-  $("#loginForm").classList.toggle("hidden", type !== "login");
-  $("#registerForm").classList.toggle("hidden", type !== "register");
+function modulePage(page){
+ const names={tasks:'Tasks & Deadlines',projects:'Projects',repositories:'Code Repositories',employees:'Employees',users:'Users',interns:'Intern Management',attendance:'Attendance',leave:'Leave Management',salary:'Salary Tracking',overtime:'Overtime Tracking',roles:'Roles & Permissions',worklog:'Work Logs',reports:'Reports',messages:'Messages',chat:'Chats',groups:'Groups',documents:'Documents',certificates:'Certificates',analytics:'Analytics',overview:'Company Overview',teams:'Teams',finance:'Finance',monitoring:'System Monitoring',announcements:'Announcements',backup:'Backup & Restore',audit:'Audit Logs',performance:'Performance'};
+ const title=names[page]||'Portal module';
+ let rows=[['AI Chatbot System','Parth Patel','In Progress','75%'],['Mobile Banking App','Aman Tiwari','In Progress','60%'],['Website Redesign','Neha Iyer','On Hold','30%'],['Internal CRM','Kavya Nair','Completed','100%']];
+ if(page==='attendance')rows=[['Parth Patel','Present','20 Aug 2026','6h 30m'],['Aman Tiwari','Present','20 Aug 2026','7h 10m'],['Neha Iyer','Leave','20 Aug 2026','—'],['Kavya Nair','Present','20 Aug 2026','8h 02m']];
+ if(page==='leave')rows=[['Aman Tiwari','Casual Leave','15–17 Jun','Pending'],['Neha Iyer','Sick Leave','24–25 Jun','Pending'],['Vikram Patel','Casual Leave','20 Jun','Approved'],['Kavya Nair','Work From Home','18 Jun','Rejected']];
+ if(page==='employees'||page==='users'||page==='interns')rows=[['Parth Patel','EMP001','Frontend Developer','Active'],['Aman Tiwari','EMP002','Backend Developer','Active'],['Neha Iyer','EMP003','UI/UX Designer','On Leave'],['Kavya Nair','EMP004','HR Executive','Active']];
+ return genericPage(title,`Manage ${title.toLowerCase()} from the ${currentUser.role} workspace.`,`<section class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Item</th><th>Owner / Type</th><th>Status / Date</th><th>Action</th></tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}<td><button class="link-btn" data-action="demo">View</button></td></tr>`).join('')}</tbody></table></div></section>`)
 }
+function renderPage(page){currentPage=page;buildNav();pageContent.innerHTML=pageFor(currentUser.role,page);$('#sidebar').classList.remove('open');$('#sidebarOverlay').classList.remove('show');pageContent.querySelectorAll('[data-theme]').forEach(b=>b.addEventListener('click',()=>{setTheme(b.dataset.theme);renderPage('settings')}));pageContent.querySelectorAll('[data-action="demo"]').forEach(b=>b.addEventListener('click',()=>toast('UI action is ready; backend service will be connected in the next stage.')));pageContent.querySelectorAll('[data-action="password"]').forEach(b=>b.addEventListener('click',showPasswordModal))}
+function showPasswordModal(){showModal(`<h2 id="modalTitle">Change password</h2><p>For production, this form will be validated server-side and stored using secure password hashing.</p><div class="form-stack"><label>Current password<input type="password"></label><label>New password<input type="password" minlength="12"></label><label>Confirm new password<input type="password" minlength="12"></label><button class="primary-btn" data-action="demo">Update password</button></div>`)}
+function showModal(html){$('#modalContent').innerHTML=html;$('#modal').classList.remove('hidden');$('#modalContent').querySelectorAll('[data-action="demo"]').forEach(b=>b.addEventListener('click',()=>{toast('Password workflow is ready for secure backend integration.');$('#modal').classList.add('hidden')}))}
 
-function openModal(html) {
-  $("#modalContent").innerHTML = html;
-  $("#modal").classList.remove("hidden");
-}
-function closeModal() { $("#modal").classList.add("hidden"); }
+$('#loginForm').addEventListener('submit',e=>{e.preventDefault();login($('#loginEmail').value.trim(),$('#loginPassword').value)})
+$('#forgotBtn').addEventListener('click',()=>showModal(`<h2 id="modalTitle">Forgot password</h2><p>Password reset will be handled through the company identity service. No public account creation is available.</p><button class="primary-btn" data-action="demo">Request reset</button>`))
+$('#closeModal').addEventListener('click',()=>$('#modal').classList.add('hidden'))
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')$('#modal').classList.add('hidden')})
+$('#navMenu').addEventListener('click',e=>{const btn=e.target.closest('[data-page]');if(btn)renderPage(btn.dataset.page)})
+$('#pageContent').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b)renderPage(b.dataset.page)})
+$('#openSidebar').addEventListener('click',()=>{$('#sidebar').classList.add('open');$('#sidebarOverlay').classList.add('show')})
+$('#closeSidebar').addEventListener('click',()=>{$('#sidebar').classList.remove('open');$('#sidebarOverlay').classList.remove('show')})
+$('#sidebarOverlay').addEventListener('click',()=>{$('#sidebar').classList.remove('open');$('#sidebarOverlay').classList.remove('show')})
+$('#logoutBtn').addEventListener('click',logout);$('#sidebarLogout').addEventListener('click',logout)
+$('#notificationBtn').addEventListener('click',()=>showModal(`<h2 id="modalTitle">Notifications</h2>${listRows([['Project deadline approaching','AI Chatbot System','5 days','orange'],['Leave request pending','HR approval required','Action','red'],['New company announcement','Townhall meeting','2h ago','blue']])}`))
+$('#messageBtn').addEventListener('click',()=>{const p=currentUser.role==='Employee'?'chat':'messages';renderPage(p)})
+$('#globalSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){const q=e.target.value.trim();if(q)toast(`Search queued for “${q}”.`)}})
 
-function login(user) {
-  state.currentUser = user;
-  save();
-  renderApp();
-}
-function logout() {
-  state.currentUser = null;
-  save();
-  $("#appView").classList.add("hidden");
-  $("#authView").classList.remove("hidden");
-  showAuth("login");
-}
+window.addEventListener('storage',()=>loadTheme())
+const saved=localStorage.getItem('triobyteUser');if(saved){try{currentUser=JSON.parse(saved);if(currentUser&&menus[currentUser.role])openApp()}catch{localStorage.removeItem('triobyteUser')}}
 
-function renderApp() {
-  if (!state.currentUser) return;
-  $("#authView").classList.add("hidden");
-  $("#appView").classList.remove("hidden");
-  $("#userName").textContent = state.currentUser.name;
-  $("#roleLabel").textContent = state.currentUser.role === "admin" ? "Administrator" : "Student";
-  if ($("#topRole")) $("#topRole").textContent = state.currentUser.role === "admin" ? "Administrator" : "Student";
-  $$(".student-only").forEach(x => x.classList.toggle("hidden", state.currentUser.role !== "student"));
-  $$(".admin-only").forEach(x => x.classList.toggle("hidden", state.currentUser.role !== "admin"));
-  $("#welcomeTitle").textContent = `Welcome, ${state.currentUser.name.split(" ")[0]}`;
-  renderDashboard();
-  renderInternships();
-  renderApplications();
-  renderProfile();
-  renderAdmin();
-}
-
-function goPage(page) {
-  $$(".page").forEach(p => p.classList.add("hidden"));
-  $(`#${page}Page`).classList.remove("hidden");
-  $$(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.page === page));
-  if (page === "dashboard") renderDashboard();
-  if (page === "internships") renderInternships();
-  if (page === "applications") renderApplications();
-  if (page === "profile") renderProfile();
-  if (page === "manageInternships" || page === "manageApplications" || page === "students") renderAdmin();
-}
-
-function renderDashboard() {
-  const isAdmin = state.currentUser.role === "admin";
-  const myApps = state.applications.filter(a => a.userId === state.currentUser.id);
-  const stats = isAdmin ? [
-    ["Total Internships", state.internships.length],
-    ["Students", state.users.filter(u => u.role === "student").length],
-    ["Applications", state.applications.length],
-    ["Selected", state.applications.filter(a => a.status === "Selected").length]
-  ] : [
-    ["Available Internships", state.internships.length],
-    ["My Applications", myApps.length],
-    ["Shortlisted", myApps.filter(a => a.status === "Shortlisted").length],
-    ["Selected", myApps.filter(a => a.status === "Selected").length]
-  ];
-  $("#statsGrid").innerHTML = stats.map(s => `<div class="stat"><small>${s[0]}</small><strong>${s[1]}</strong></div>`).join("");
-  $("#dashboardInternships").innerHTML = state.internships.slice(0,3).map(cardHTML).join("");
-}
-
-function cardHTML(i) {
-  const applied = state.currentUser.role === "student" && state.applications.some(a => a.userId === state.currentUser.id && a.internshipId === i.id);
-  return `<article class="internship-card">
-    <span class="company">${escapeHTML(i.company)}</span>
-    <h3>${escapeHTML(i.title)}</h3>
-    <p>${escapeHTML(i.description)}</p>
-    <div class="card-meta">
-      <span class="chip">${escapeHTML(i.category)}</span>
-      <span class="chip">${escapeHTML(i.location)}</span>
-      <span class="chip">${escapeHTML(i.mode)}</span>
-      <span class="chip">${escapeHTML(i.duration)}</span>
-    </div>
-    <div class="card-footer">
-      <span class="stipend">${escapeHTML(i.stipend)}</span>
-      <button class="small-btn" onclick="viewInternship(${i.id})">${applied ? "View Status" : "View Details"}</button>
-    </div>
-  </article>`;
-}
-
-function populateFilters() {
-  const categories = [...new Set(state.internships.map(i => i.category))].sort();
-  const locations = [...new Set(state.internships.map(i => i.location))].sort();
-  $("#categoryFilter").innerHTML = `<option value="">All categories</option>` + categories.map(x => `<option>${escapeHTML(x)}</option>`).join("");
-  $("#locationFilter").innerHTML = `<option value="">All locations</option>` + locations.map(x => `<option>${escapeHTML(x)}</option>`).join("");
-}
-
-function renderInternships() {
-  populateFilters();
-  const search = ($("#searchInput")?.value || "").toLowerCase();
-  const cat = $("#categoryFilter")?.value || "";
-  const loc = $("#locationFilter")?.value || "";
-  const filtered = state.internships.filter(i =>
-    `${i.title} ${i.company} ${i.skills}`.toLowerCase().includes(search) &&
-    (!cat || i.category === cat) &&
-    (!loc || i.location === loc)
-  );
-  $("#internshipGrid").innerHTML = filtered.length ? filtered.map(cardHTML).join("") : `<div class="empty">No internships match your filters.</div>`;
-}
-
-function viewInternship(id) {
-  const i = state.internships.find(x => x.id === id);
-  if (!i) return;
-  const existing = state.applications.find(a => a.userId === state.currentUser.id && a.internshipId === id);
-  let action = "";
-  if (state.currentUser.role === "student") {
-    action = existing
-      ? `<span class="status status-${existing.status}">${existing.status}</span>`
-      : `<button class="primary-btn" onclick="applyToInternship(${id})">Apply Now</button>`;
-  }
-  openModal(`<h2>${escapeHTML(i.title)}</h2>
-    <div class="detail-list">
-      <div><strong>Company:</strong> ${escapeHTML(i.company)}</div>
-      <div><strong>Category:</strong> ${escapeHTML(i.category)}</div>
-      <div><strong>Location:</strong> ${escapeHTML(i.location)}</div>
-      <div><strong>Mode:</strong> ${escapeHTML(i.mode)}</div>
-      <div><strong>Duration:</strong> ${escapeHTML(i.duration)}</div>
-      <div><strong>Stipend:</strong> ${escapeHTML(i.stipend)}</div>
-      <div><strong>Skills:</strong> ${escapeHTML(i.skills)}</div>
-      <div><strong>Description:</strong> ${escapeHTML(i.description)}</div>
-    </div>
-    <div class="modal-actions">${action}<button class="outline-btn" onclick="closeModal()">Close</button></div>`);
-}
-
-function applyToInternship(id) {
-  if (state.currentUser.role !== "student") return;
-  const user = state.users.find(u => u.id === state.currentUser.id);
-  const internship = state.internships.find(i => i.id === id);
-  if (state.applications.some(a => a.userId === user.id && a.internshipId === id)) {
-    toast("You have already applied.");
-    return;
-  }
-  openModal(`<h2>Apply for ${escapeHTML(internship.title)}</h2>
-    <form id="applicationForm" class="auth-form">
-      <label>Why are you interested?</label>
-      <textarea id="coverLetter" rows="5" required placeholder="Write a short application message..."></textarea>
-      <label>Resume</label>
-      <input id="resumeFile" type="file" accept=".pdf,.doc,.docx" required />
-      <div class="modal-actions"><button class="primary-btn" type="submit">Submit Application</button><button type="button" class="outline-btn" onclick="closeModal()">Cancel</button></div>
-    </form>`);
-  $("#applicationForm").onsubmit = e => {
-    e.preventDefault();
-    const file = $("#resumeFile").files[0];
-    state.applications.push({
-      id: uid("app_"), userId: user.id, internshipId: id,
-      coverLetter: $("#coverLetter").value, resumeName: file?.name || "Resume",
-      status: "Applied", appliedAt: new Date().toLocaleDateString()
-    });
-    save(); closeModal(); renderApp(); toast("Application submitted successfully.");
-  };
-}
-
-function renderApplications() {
-  if (state.currentUser.role !== "student") return;
-  const apps = state.applications.filter(a => a.userId === state.currentUser.id);
-  $("#myApplications").innerHTML = apps.length ? `<table>
-    <thead><tr><th>Internship</th><th>Company</th><th>Applied</th><th>Status</th><th>Resume</th></tr></thead>
-    <tbody>${apps.map(a => {
-      const i = state.internships.find(x => x.id === a.internshipId);
-      return `<tr><td>${escapeHTML(i?.title || "Deleted")}</td><td>${escapeHTML(i?.company || "-")}</td><td>${a.appliedAt}</td><td><span class="status status-${a.status}">${a.status}</span></td><td>${escapeHTML(a.resumeName)}</td></tr>`;
-    }).join("")}</tbody></table>` : `<div class="empty">You have not applied for any internship yet.</div>`;
-}
-
-function renderProfile() {
-  if (state.currentUser.role !== "student") return;
-  const u = state.users.find(x => x.id === state.currentUser.id);
-  if (!u) return;
-  $("#profileName").value = u.name || "";
-  $("#profileEmail").value = u.email || "";
-  $("#profileCourse").value = u.course || "";
-  $("#profileCollege").value = u.college || "";
-  $("#profilePhone").value = u.phone || "";
-  $("#profileSkills").value = u.skills || "";
-}
-
-function renderAdmin() {
-  if (state.currentUser.role !== "admin") return;
-  $("#adminInternships").innerHTML = `<table><thead><tr><th>Internship</th><th>Company</th><th>Location</th><th>Actions</th></tr></thead><tbody>
-    ${state.internships.map(i => `<tr><td>${escapeHTML(i.title)}</td><td>${escapeHTML(i.company)}</td><td>${escapeHTML(i.location)}</td><td class="actions"><button class="small-btn" onclick="editInternship(${i.id})">Edit</button><button class="danger-btn" onclick="deleteInternship(${i.id})">Delete</button></td></tr>`).join("")}
-  </tbody></table>`;
-
-  $("#adminApplications").innerHTML = state.applications.length ? `<table><thead><tr><th>Student</th><th>Internship</th><th>Applied</th><th>Status</th><th>Update</th></tr></thead><tbody>
-    ${state.applications.map(a => {
-      const u = state.users.find(x => x.id === a.userId);
-      const i = state.internships.find(x => x.id === a.internshipId);
-      return `<tr><td>${escapeHTML(u?.name || "Unknown")}<br><small>${escapeHTML(u?.email || "")}</small></td><td>${escapeHTML(i?.title || "Deleted")}</td><td>${a.appliedAt}</td><td><span class="status status-${a.status}">${a.status}</span></td>
-      <td><select onchange="changeStatus('${a.id}', this.value)">
-        ${["Applied","Shortlisted","Selected","Rejected"].map(s => `<option ${s===a.status?"selected":""}>${s}</option>`).join("")}
-      </select></td></tr>`;
-    }).join("")}</tbody></table>` : `<div class="empty">No applications yet.</div>`;
-
-  const students = state.users.filter(u => u.role === "student");
-  $("#studentsTable").innerHTML = students.length ? `<table><thead><tr><th>Name</th><th>Email</th><th>Course</th><th>College</th><th>Applications</th></tr></thead><tbody>
-    ${students.map(u => `<tr><td>${escapeHTML(u.name)}</td><td>${escapeHTML(u.email)}</td><td>${escapeHTML(u.course)}</td><td>${escapeHTML(u.college)}</td><td>${state.applications.filter(a=>a.userId===u.id).length}</td></tr>`).join("")}</tbody></table>` : `<div class="empty">No registered students yet.</div>`;
-}
-
-function internshipForm(existing) {
-  const i = existing || {};
-  openModal(`<h2>${existing ? "Edit Internship" : "Add Internship"}</h2>
-    <form id="internshipForm" class="form-grid">
-      <label>Title<input id="iTitle" required value="${attr(i.title)}"></label>
-      <label>Company<input id="iCompany" required value="${attr(i.company)}"></label>
-      <label>Category<input id="iCategory" required value="${attr(i.category)}"></label>
-      <label>Location<input id="iLocation" required value="${attr(i.location)}"></label>
-      <label>Mode<select id="iMode"><option>Remote</option><option>Hybrid</option><option>On-site</option></select></label>
-      <label>Duration<input id="iDuration" required value="${attr(i.duration)}"></label>
-      <label>Stipend<input id="iStipend" required value="${attr(i.stipend)}"></label>
-      <label>Skills<input id="iSkills" required value="${attr(i.skills)}"></label>
-      <label class="full">Description<textarea id="iDescription" rows="4" required>${escapeHTML(i.description || "")}</textarea></label>
-      <div class="modal-actions full"><button class="primary-btn" type="submit">Save Internship</button><button type="button" class="outline-btn" onclick="closeModal()">Cancel</button></div>
-    </form>`);
-  $("#iMode").value = i.mode || "Remote";
-  $("#internshipForm").onsubmit = e => {
-    e.preventDefault();
-    const data = {
-      title: $("#iTitle").value, company: $("#iCompany").value, category: $("#iCategory").value,
-      location: $("#iLocation").value, mode: $("#iMode").value, duration: $("#iDuration").value,
-      stipend: $("#iStipend").value, skills: $("#iSkills").value, description: $("#iDescription").value
-    };
-    if (existing) Object.assign(existing, data);
-    else state.internships.push({id: Date.now(), ...data});
-    save(); closeModal(); renderApp(); toast(existing ? "Internship updated." : "Internship created.");
-  };
-}
-
-function editInternship(id) { internshipForm(state.internships.find(i => i.id === id)); }
-function deleteInternship(id) {
-  if (!confirm("Delete this internship?")) return;
-  state.internships = state.internships.filter(i => i.id !== id);
-  save(); renderApp(); toast("Internship deleted.");
-}
-function changeStatus(appId, status) {
-  const a = state.applications.find(x => x.id === appId);
-  if (a) { a.status = status; save(); renderApp(); toast(`Application marked ${status}.`); }
-}
-
-function escapeHTML(v="") {
-  return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function attr(v="") { return escapeHTML(v); }
-
-$$('.role-tab').forEach(b => b.addEventListener('click', () => {
-  $$('.role-tab').forEach(x => x.classList.remove('active'));
-  b.classList.add('active');
-  $('#loginRole').value = b.dataset.role;
-  showAuth('login');
-}));
-$$('[data-auth="register"]').forEach(b => b.addEventListener('click', () => showAuth('register')));
-if ($('#sidebarLogout')) $('#sidebarLogout').addEventListener('click', logout);
-if ($('#heroSearchBtn')) $('#heroSearchBtn').addEventListener('click', () => { const q = $('#heroSearch').value.trim(); goPage('internships'); $('#searchInput').value = q; renderInternships(); });
-if ($('#heroSearch')) $('#heroSearch').addEventListener('keydown', e => { if (e.key === 'Enter') $('#heroSearchBtn').click(); });
-$("#loginForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const email = $("#loginEmail").value.trim().toLowerCase();
-  const password = $("#loginPassword").value;
-  const role = $("#loginRole").value;
-  if (role === "admin" && email === "admin123@portal.com" && password === "Admin@0987") {
-    login({id:"admin", name:"Portal Admin", email, role:"admin"});
-    return;
-  }
-  const user = state.users.find(u => u.email === email && u.password === password && u.role === role);
-  if (!user) return toast("Invalid email, password or role.");
-  login(user);
-});
-$("#registerForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const email = $("#regEmail").value.trim().toLowerCase();
-  if (state.users.some(u => u.email === email)) return toast("Email already registered.");
-  const user = {
-    id: uid("stu_"), name: $("#regName").value.trim(), email,
-    password: $("#regPassword").value, course: $("#regCourse").value.trim(),
-    college: $("#regCollege").value.trim(), role:"student", phone:"", skills:""
-  };
-  state.users.push(user); save(); login(user); toast("Account created.");
-});
-$("#logoutBtn").addEventListener("click", logout);
-$("#closeModal").addEventListener("click", closeModal);
-$("#modal").addEventListener("click", e => { if (e.target.id === "modal") closeModal(); });
-
-$$(".nav-btn").forEach(b => b.addEventListener("click", () => goPage(b.dataset.page)));
-$$("[data-go]").forEach(b => b.addEventListener("click", () => goPage(b.dataset.go)));
-$("#searchInput").addEventListener("input", renderInternships);
-$("#categoryFilter").addEventListener("change", renderInternships);
-$("#locationFilter").addEventListener("change", renderInternships);
-$("#addInternshipBtn").addEventListener("click", () => internshipForm());
-
-$("#profileForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const u = state.users.find(x => x.id === state.currentUser.id);
-  Object.assign(u, {
-    name: $("#profileName").value, email: $("#profileEmail").value,
-    course: $("#profileCourse").value, college: $("#profileCollege").value,
-    phone: $("#profilePhone").value, skills: $("#profileSkills").value,
-    resumeName: $("#profileResume").files[0]?.name || u.resumeName || ""
-  });
-  state.currentUser = u; save(); renderApp(); toast("Profile saved.");
-});
-
-if (state.currentUser) renderApp();
-
-/* =========================================
-   MOBILE MENU
-   ========================================= */
-
-const mobileMenuBtn = document.getElementById("mobileMenuBtn");
-const sidebar = document.querySelector(".sidebar");
-
-if (mobileMenuBtn && sidebar) {
-
-    mobileMenuBtn.addEventListener("click", function () {
-        sidebar.classList.toggle("mobile-open");
-    });
-
-
-    /* Close menu when a navigation button is clicked */
-    document.querySelectorAll(".sidebar .nav-btn").forEach(function (button) {
-
-        button.addEventListener("click", function () {
-
-            if (window.innerWidth <= 760) {
-                sidebar.classList.remove("mobile-open");
-            }
-
-        });
-
-    });
-
-
-    /* Close menu when screen becomes desktop size */
-    window.addEventListener("resize", function () {
-
-        if (window.innerWidth > 760) {
-            sidebar.classList.remove("mobile-open");
-        }
-
-    });
-}
+/* Frontend preview credentials — remove these before production deployment. */
+window.TriobyteDemoAccounts=Object.keys(demoUsers).map(email=>({email,password:demoUsers[email].password,role:demoUsers[email].role}));
